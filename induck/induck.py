@@ -20,11 +20,10 @@ class Duck:
     def __init__(self, hp, name, position=(0,0)):
         self.hp = hp
         self.name = name
-        self.position = (position[0], position[1])
         self.direction = 0 #0:위 1:오른쪽 2:아래 3:왼쪽
         self.x = 8 + position[0] * 40
         self.y = 8 + position[1] * 40
-        print(f"{self.name} 오리가 {self.getPosition()}에 생성되었습니다")
+        print(f"{self.name} 오리가 {(self.x-8)//40}, {(self.y-8)//40}에 생성되었습니다")
 
     def getName(self):
         return self.name
@@ -32,8 +31,6 @@ class Duck:
     def getHp(self):
         return self.hp
 
-    def getPosition(self):
-        return self.position
 
     def getDirection(self):
         if(self.direction==0): return "위쪽"
@@ -41,27 +38,39 @@ class Duck:
         elif(self.direction==2): return "아래쪽"
         elif(self.direction==3): return "왼쪽"
 
-    def moveTo(self, x, y):
-        self.position = (x,y)
-        print(f"{self.name} 오리가 {self.getPosition()}로 이동하였습니다.")
+    def move(self):
+        temp = (self.x+10, self.y+10)
+        if(self.direction==0):self.y -= 40
+        elif(self.direction==1):self.x += 40
+        elif(self.direction==2):self.y += 40
+        elif(self.direction==3):self.x -= walk
+        duckstamp.place(x=self.x,y=self.y)
+        canvas.create_line(temp, (self.x+10, self.y+10), fill='red', width=1, smooth=False)
+
+        
     
-    def turnRight(self):
+    def turn_right(self):
         self.direction+=1
         self.direction%=4
-        global duckstamp
-        global duckimg_up
-        global duckimg_right
-        global duckimg_down
-        global duckimg_left
-        global duck_direction
-        duck_direction+=1
-        duck_direction%=4
-        if(duck_direction==0): duckstamp.config(image=duckimg_up)
-        elif(duck_direction==1): duckstamp.config(image=duckimg_right)
-        elif(duck_direction==2): duckstamp.config(image=duckimg_down)
-        elif(duck_direction==3): duckstamp.config(image=duckimg_left)
-        print(f"{self.name} 오리가 {self.getDirection()} 방향을 보고있습니다.")
+        self.change_image()
+        
 
+    def turn_left(self):
+        self.direction-=1
+        self.direction%=4
+        self.change_image()
+
+    def change_image(self):
+        if(self.direction==0): duckstamp.config(image=duckimg_up)
+        elif(self.direction==1): duckstamp.config(image=duckimg_right)
+        elif(self.direction==2): duckstamp.config(image=duckimg_down)
+        elif(self.direction==3): duckstamp.config(image=duckimg_left)
+
+    def show_position(self):
+        print(f"{self.name}의 위치 : {(self.x-8)//40}, {(self.y-8)//40}")
+
+
+        
 #########################################
 
 
@@ -74,24 +83,16 @@ def start():
     window.geometry("800x800")
     window.resizable(0,0)
 
-    btn = tk.Button(window, text="move", command=move)
-    btn.grid(row=2, column=0)
-
-    btn = tk.Button(window, text="turn left", command=turn_left)
-    btn.grid(row=2, column=1)
-
-    btn = tk.Button(window, text="turn right", command=turn_right)
-    btn.grid(row=2, column=2)
-
-
 def create_lake(row, column):
     global canvas
     global grow
     global gcolumn
     grow = row
     gcolumn = column
+
+    global canvas
     
-    canvas = tk.Canvas(window, width=40*row, height=40*column)
+    canvas = tk.Canvas(window, width=40*row, height=40*column, background='skyblue')
     canvas.grid(row=0, column=0)
     #좌표축 그리기
     for i in range(row):
@@ -129,57 +130,11 @@ def set_images():
     duckimg_left = ImageTk.PhotoImage(img_resize)
 
 def stamp(duck):
+    global duckstamp
     duckstamp = tk.Label(image=duckimg_up)
     duckstamp.place(x=duck.x, y = duck.y)
 #######################  start 파일에서 해야될거 미리 테스트  #######################
 
-
-
-
-def turn_left():
-    global duckstamp
-    global duckimg_up
-    global duckimg_right
-    global duckimg_down
-    global duckimg_left
-    global duck_direction
-    duck_direction-=1
-    duck_direction%=4
-    if(duck_direction==0): duckstamp.config(image=duckimg_up)
-    elif(duck_direction==1): duckstamp.config(image=duckimg_right)
-    elif(duck_direction==2): duckstamp.config(image=duckimg_down)
-    elif(duck_direction==3): duckstamp.config(image=duckimg_left)
-
-def turn_right():
-    global duckstamp
-    global duckimg_up
-    global duckimg_right
-    global duckimg_down
-    global duckimg_left
-    global duck_direction
-    duck_direction+=1
-    duck_direction%=4
-    if(duck_direction==0): duckstamp.config(image=duckimg_up)
-    elif(duck_direction==1): duckstamp.config(image=duckimg_right)
-    elif(duck_direction==2): duckstamp.config(image=duckimg_down)
-    elif(duck_direction==3): duckstamp.config(image=duckimg_left)
-
-def move():
-    global duck_position_x
-    global duck_position_y
-    if(duck_direction==0): 
-        if(duck_position_y <= 8): return
-        duck_position_y -= walk
-    elif(duck_direction==1):
-        if(duck_position_x >= 40*grow - 32): return 
-        duck_position_x += walk
-    elif(duck_direction==2):
-        if(duck_position_y >= 40*gcolumn - 32): return  
-        duck_position_y += walk
-    elif(duck_direction==3):
-        if(duck_position_x <= 8): return   
-        duck_position_x -= walk
-    duckstamp.place(x=duck_position_x,y=duck_position_y)
     
 
 
