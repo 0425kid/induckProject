@@ -17,13 +17,15 @@ def pause(delay = 1.0): #잠시 대기하는 함수, 기본값은 1초 대기
 
 #######################  Duck 클래스 설정  #######################
 class Duck:
-    def __init__(self, hp, name, position=(0,0)):
+    def __init__(self, hp, name, position=(0,0), pause_time=1):
         self.hp = hp
         self.name = name
         self.direction = 0 #0:위 1:오른쪽 2:아래 3:왼쪽
         self.x = 8 + position[0] * 40
         self.y = 8 + position[1] * 40
+        self.pause_time = pause_time
         print(f"{self.name} 오리가 {(self.x-8)//40}, {(self.y-8)//40}에 생성되었습니다")
+        name_label.configure(text=f"오리의 이름 : {self.name}")
 
     def getName(self):
         return self.name
@@ -39,6 +41,7 @@ class Duck:
         elif(self.direction==3): return "왼쪽"
 
     def move(self):
+        window_update(self.pause_time)
         temp = (self.x+10, self.y+10)
         if(self.direction==0):self.y -= 40
         elif(self.direction==1):self.x += 40
@@ -46,19 +49,24 @@ class Duck:
         elif(self.direction==3):self.x -= walk
         duckstamp.place(x=self.x,y=self.y)
         canvas.create_line(temp, (self.x+10, self.y+10), fill='red', width=1, smooth=False)
+        window.update()
 
         
     
     def turn_right(self):
+        window_update(self.pause_time)
         self.direction+=1
         self.direction%=4
         self.change_image()
+        window.update()
         
 
     def turn_left(self):
+        window_update(self.pause_time)
         self.direction-=1
         self.direction%=4
         self.change_image()
+        window.update()
 
     def change_image(self):
         if(self.direction==0): duckstamp.config(image=duckimg_up)
@@ -100,8 +108,10 @@ def create_lake(row, column):
     for i in range(column):
         canvas.create_line((0, 40*i), (40*row, 40*i), fill='black', width=1, smooth=False)
 
-    # lbl = tk.Label(window, text=f"오리의 이름 : {duck.getName()}", font="D2Coding 10")
-    # lbl.grid(row=3, column=0)
+    global name_label
+
+    name_label = tk.Label(window, text=f"오리의 이름 : ", font="D2Coding 10")
+    name_label.grid(row=3, column=0)
 
 def set_images():
     global duckimg_up
@@ -140,7 +150,9 @@ def stamp(duck):
 
 
 
-
+def window_update(n=1):
+    pause(n)
+    window.update()
 
 
 def last():
